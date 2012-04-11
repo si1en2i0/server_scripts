@@ -1,0 +1,14 @@
+GEM
+  remote: http://ruby.taobao.org/
+  specs:
+    json (1.6.6)
+    memcached (1.4.1)
+    nokogiri (1.5.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  json
+  memcached
+  nokogiri
