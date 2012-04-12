@@ -204,7 +204,7 @@ doc.css('#left > .box').each do |box|
 	end
 
 	if day[:programs].count == 0 && istoday && @qq[:review].count > 0
-		#day[:programs] = @qq[:review]
+		day[:programs] = @qq[:review]
 	end
 
 	days << day
