@@ -32,7 +32,6 @@ def parse_program(raw)
 	special = false
 
 	/(\d{2}:\d{2})[\s ]{1,2}(\S*)[\s ](\S*)[ \s–|\-]{1,5}(\S*)/m =~ raw
-	#p tmp
 	if $1.nil?
 		special = true
 		/(\d{2}:\d{2})\S*\s{1,2}(\S*)\s(.*)/ =~ raw
@@ -52,16 +51,21 @@ end
 
 def get_from_ppnba(date, home_team)
 	record = @ppnba[date]
-	if record.nil? or !record.has_key?(date)
+	if record.nil? or !record.has_key?(home_team)
 		[]
 	else
-		@ppnba[:date][:home_team]
+		record[home_team]
 	end
 end
 
 # get programs progress from qq JSON API, store video or text live url
 json = get_source('http://sports.qq.com/c/today_schedules_new.htm', :gbk => true)
-progress = JSON.parse(json[0, json.length - 64])
+
+begin
+	progress = JSON.parse(json[0, json.length - 64])
+rescue
+	exit
+end
 
 @qq = { :live => {}, :review => []}
 progress.each do |item|
@@ -76,13 +80,13 @@ progress.each do |item|
 	
 	url = item['zhiboUrl'] ? item['zhiboUrl'] : item['url'];
 	if item['status'] == '已结束'
-		scores = [item['visitTeamScore'], item['homeTeamScore']]
+		scores = [item['homeTeamScore'], item['visitTeamScore']]
 		@qq[:live][item['homeTeamName']] = { :end => true, :scores => scores, :link => ['直播实录', url] }; 
 		@qq[:review] << {
 			:time => item['matchTime'][6, 5],
 			:types => '',
 			:links => [['直播实录', url]],
-			:teams => [item['visitTeamName'], item['homeTeamName']],
+			:teams => [item['homeTeamName'], item['visitTeamName']],
 			:scores => scores
 		};
 	else
@@ -200,7 +204,7 @@ doc.css('#left > .box').each do |box|
 	end
 
 	if day[:programs].count == 0 && istoday && @qq[:review].count > 0
-		day[:programs] = @qq[:review]
+		#day[:programs] = @qq[:review]
 	end
 
 	days << day
